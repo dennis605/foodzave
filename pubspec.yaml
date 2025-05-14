@@ -1,0 +1,46 @@
+name: foodzave
+description: "Eine App zur Verwaltung von Lebensmitteln und Vermeidung von Verschwendung."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  # Firebase Abhängigkeiten
+  firebase_core: ^2.25.3
+  firebase_auth: ^4.17.3
+  cloud_firestore: ^4.15.3
+  firebase_messaging: ^14.7.4
+  # Barcode Scanning
+  flutter_barcode_scanner: ^2.0.0
+  # HTTP für API-Anfragen
+  http: ^1.2.0
+  # Lokale Datenspeicherung
+  shared_preferences: ^2.2.2
+  # Benachrichtigungen
+  flutter_local_notifications: ^16.3.2
+  # Formatierung und Lokalisierung
+  intl: ^0.18.1
+  # Teilen von Inhalten
+  share_plus: ^8.0.2
+  # State Management
+  provider: ^6.0.5
+  # Bildverwaltung
+  image_picker: ^1.0.7
+  cached_network_image: ^3.3.1
+  # Offline-Unterstützung
+  connectivity_plus: ^5.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
