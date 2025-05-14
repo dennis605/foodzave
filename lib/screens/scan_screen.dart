@@ -99,7 +99,7 @@ class _ScanScreenState extends State<ScanScreen> {
           _foundProduct = product;
           
           // Vorschlag für Erinnerungstage basierend auf Kategorie setzen
-          _selectedReminderDays = _inventoryService.getSuggestedReminderDays(product.category ?? '');
+          _selectedReminderDays = _inventoryService.getSuggestedReminderDays(product?.category ?? '');
         });
         
         // Prüfen, ob es bereits Einträge für dieses Produkt gibt
