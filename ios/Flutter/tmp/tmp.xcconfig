@@ -1,0 +1,1 @@
+EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64e
