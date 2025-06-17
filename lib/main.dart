@@ -9,10 +9,13 @@ import 'package:foodzave/services/auth_service.dart';
 import 'package:foodzave/services/notification_service.dart';
 import 'package:foodzave/theme/app_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   
   // Initialisiere den Benachrichtigungsdienst
   final notificationService = NotificationService();

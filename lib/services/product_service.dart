@@ -53,7 +53,7 @@ class ProductService {
       await _productsCollection.doc(product.id).set(product.toMap());
     } catch (e) {
       print('Error saving product: $e');
-      throw e;
+      rethrow;
     }
   }
   

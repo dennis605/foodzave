@@ -104,7 +104,7 @@ class ShoppingListService {
       });
     } catch (e) {
       print('Error marking item as purchased: $e');
-      throw e;
+      rethrow;
     }
   }
   
@@ -114,7 +114,7 @@ class ShoppingListService {
       await _shoppingListCollection.doc(itemId).delete();
     } catch (e) {
       print('Error removing shopping list item: $e');
-      throw e;
+      rethrow;
     }
   }
   
@@ -131,7 +131,7 @@ class ShoppingListService {
       });
     } catch (e) {
       print('Error updating item quantity: $e');
-      throw e;
+      rethrow;
     }
   }
   

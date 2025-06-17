@@ -119,7 +119,7 @@ class InventoryService {
       });
     } catch (e) {
       print('Error marking item as consumed: $e');
-      throw e;
+      rethrow;
     }
   }
   
@@ -129,7 +129,7 @@ class InventoryService {
       await _inventoryCollection.doc(itemId).delete();
     } catch (e) {
       print('Error deleting inventory item: $e');
-      throw e;
+      rethrow;
     }
   }
   
@@ -154,7 +154,7 @@ class InventoryService {
         await _inventoryCollection.doc(itemId).update(updates);
       } catch (e) {
         print('Error updating inventory item: $e');
-        throw e;
+        rethrow;
       }
     }
   }
