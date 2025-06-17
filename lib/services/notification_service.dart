@@ -16,30 +16,35 @@ class NotificationService {
   
   // Initialisierung
   Future<void> init() async {
-    tz_data.initializeTimeZones();
-    
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@drawable/app_icon');
-    
-    const DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
-    
-    const InitializationSettings initializationSettings =
-        InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-    );
-    
-    await _notificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) async {
-        // Hier kann optional die Aktion beim Tippen auf die Benachrichtigung definiert werden
-      },
-    );
+    try {
+      tz_data.initializeTimeZones();
+      
+      const AndroidInitializationSettings initializationSettingsAndroid =
+          AndroidInitializationSettings('@drawable/app_icon');
+      
+      const DarwinInitializationSettings initializationSettingsIOS =
+          DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
+      
+      const InitializationSettings initializationSettings =
+          InitializationSettings(
+        android: initializationSettingsAndroid,
+        iOS: initializationSettingsIOS,
+      );
+      
+      await _notificationsPlugin.initialize(
+        initializationSettings,
+        onDidReceiveNotificationResponse: (NotificationResponse response) async {
+          // Hier kann optional die Aktion beim Tippen auf die Benachrichtigung definiert werden
+        },
+      );
+    } catch (e) {
+      print('Benachrichtigungsdienst-Initialisierung fehlgeschlagen: $e');
+      // Für Web/Demo-Zwecke ignorieren wir Fehler
+    }
   }
   
   // Berechtigung für Benachrichtigungen anfragen

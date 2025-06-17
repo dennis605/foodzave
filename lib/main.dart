@@ -13,13 +13,23 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print('Firebase erfolgreich initialisiert');
+  } catch (e) {
+    print('Firebase-Initialisierung fehlgeschlagen: $e');
+  }
   
   // Initialisiere den Benachrichtigungsdienst
-  final notificationService = NotificationService();
-  await notificationService.init();
+  try {
+    final notificationService = NotificationService();
+    await notificationService.init();
+  } catch (e) {
+    print('Benachrichtigungsdienst-Initialisierung fehlgeschlagen: $e');
+  }
   
   runApp(const FoodZaveApp());
 }

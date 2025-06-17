@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:foodzave/models/inventory_item.dart';
-import 'package:foodzave/services/inventory_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,53 +8,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final InventoryService _inventoryService = InventoryService();
-  List<InventoryItem> _expiringItems = [];
-  List<InventoryItem> _allActiveItems = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final activeItems = await _inventoryService.getActiveInventoryItems();
-      final expiringItems = activeItems.where((item) => item.isAboutToExpire || item.isExpired).toList();
-      
-      // Sort by expiration date (soonest first)
-      expiringItems.sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
-      activeItems.sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
-
-      setState(() {
-        _expiringItems = expiringItems;
-        _allActiveItems = activeItems;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      _showErrorSnackBar('Fehler beim Laden der Daten');
-    }
-  }
-
-  void _showErrorSnackBar(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.error,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,37 +16,63 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadData,
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Demo-Modus: Daten aktualisiert')),
+              );
+            },
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadData,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildOverviewCard(),
-                      const SizedBox(height: 20),
-                      _buildExpiringSection(),
-                    ],
-                  ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildWelcomeCard(),
+            const SizedBox(height: 20),
+            _buildOverviewCard(),
+            const SizedBox(height: 20),
+            _buildExpiringSection(),
+            const SizedBox(height: 20),
+            _buildQuickActionsCard(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWelcomeCard() {
+    return Card(
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.restaurant, size: 32, color: Colors.green),
+                const SizedBox(width: 12),
+                Text(
+                  'Willkommen bei FoodZave!',
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
-              ),
+              ],
             ),
+            const SizedBox(height: 12),
+            const Text(
+              'Verwalte deine Lebensmittel intelligent und vermeide Verschwendung. '
+              'Diese Demo zeigt alle Hauptfunktionen der App.',
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildOverviewCard() {
-    final expiredCount = _allActiveItems.where((item) => item.isExpired).length;
-    final aboutToExpireCount = _allActiveItems.where((item) => item.isAboutToExpire && !item.isExpired).length;
-    final goodCount = _allActiveItems.length - expiredCount - aboutToExpireCount;
-
     return Card(
       elevation: 4,
       child: Padding(
@@ -104,17 +81,17 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Bestandsübersicht',
+              'Bestandsübersicht (Demo)',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 16),
-            _buildStatusRow('Bald ablaufend', aboutToExpireCount, Colors.orange),
+            _buildStatusRow('Bald ablaufend', 2, Colors.orange),
             const SizedBox(height: 8),
-            _buildStatusRow('Abgelaufen', expiredCount, Colors.red),
+            _buildStatusRow('Abgelaufen', 1, Colors.red),
             const SizedBox(height: 8),
-            _buildStatusRow('In Ordnung', goodCount, Colors.green),
+            _buildStatusRow('In Ordnung', 5, Colors.green),
             const SizedBox(height: 8),
-            _buildStatusRow('Insgesamt', _allActiveItems.length, Colors.blue),
+            _buildStatusRow('Insgesamt', 8, Colors.blue),
           ],
         ),
       ),
@@ -144,73 +121,98 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildExpiringSection() {
-    if (_expiringItems.isEmpty) {
-      return const Card(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Center(
-            child: Text(
-              'Keine ablaufenden Lebensmittel! 🎉',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-        ),
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Bald ablaufende Lebensmittel',
+          'Bald ablaufende Lebensmittel (Demo)',
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
-        ...List.generate(
-          _expiringItems.length > 5 ? 5 : _expiringItems.length,
-          (index) {
-            final item = _expiringItems[index];
-            final product = item.product;
-            
-            final bool isExpired = item.isExpired;
-            final daysUntilExpiry = item.expiryDate.difference(DateTime.now()).inDays;
-            
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              color: isExpired ? Colors.red.shade50 : Colors.orange.shade50,
-              child: ListTile(
-                title: Text(product?.name ?? 'Unbekanntes Produkt'),
-                subtitle: Text(
-                  isExpired
-                      ? 'Abgelaufen seit ${-daysUntilExpiry} Tagen'
-                      : 'Läuft in $daysUntilExpiry Tagen ab',
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.check),
-                  onPressed: () async {
-                    await _inventoryService.markItemAsConsumed(item.id);
-                    _loadData();
-                  },
-                  tooltip: 'Als verbraucht markieren',
-                ),
-              ),
+        _buildExpiringItem('Vollmilch', 'Läuft in 2 Tagen ab', Colors.orange),
+        _buildExpiringItem('Äpfel', 'Läuft in 3 Tagen ab', Colors.orange),
+        _buildExpiringItem('Brot', 'Abgelaufen seit 1 Tag', Colors.red),
+      ],
+    );
+  }
+
+  Widget _buildExpiringItem(String name, String subtitle, Color color) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      color: color.withOpacity(0.1),
+      child: ListTile(
+        title: Text(name),
+        subtitle: Text(subtitle),
+        leading: Icon(Icons.food_bank, color: color),
+        trailing: IconButton(
+          icon: const Icon(Icons.check),
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('$name als verbraucht markiert (Demo)')),
             );
           },
+          tooltip: 'Als verbraucht markieren',
         ),
-        if (_expiringItems.length > 5)
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(
-              child: TextButton(
+      ),
+    );
+  }
+
+  Widget _buildQuickActionsCard() {
+    return Card(
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Schnellaktionen',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Demo: Barcode-Scanner würde sich öffnen')),
+                      );
+                    },
+                    icon: const Icon(Icons.qr_code_scanner),
+                    label: const Text('Scannen'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Demo: Bestand würde sich öffnen')),
+                      );
+                    },
+                    icon: const Icon(Icons.inventory),
+                    label: const Text('Bestand'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
                 onPressed: () {
-                  // Navigate to inventory tab
-                  Navigator.of(context).pushNamed('/inventory');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Demo: Einkaufsliste würde sich öffnen')),
+                  );
                 },
-                child: const Text('Alle anzeigen'),
+                icon: const Icon(Icons.shopping_cart),
+                label: const Text('Einkaufsliste'),
               ),
             ),
-          ),
-      ],
+          ],
+        ),
+      ),
     );
   }
 }
