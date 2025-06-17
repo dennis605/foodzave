@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,10 +10,119 @@ class MockUser {
   final String displayName;
   
   MockUser({
-    required this.email, 
+    required this.email,
     required this.uid,
     this.displayName = 'Demo User'
   });
+}
+
+// Mock Firebase User für Demo-Zwecke
+class _MockFirebaseUser implements User {
+  final MockUser _mockUser;
+  
+  _MockFirebaseUser(this._mockUser);
+  
+  @override
+  String get uid => _mockUser.uid;
+  
+  @override
+  String? get email => _mockUser.email;
+  
+  @override
+  String? get displayName => _mockUser.displayName;
+  
+  @override
+  bool get emailVerified => true;
+  
+  @override
+  bool get isAnonymous => false;
+  
+  @override
+  UserMetadata get metadata => throw UnimplementedError();
+  
+  @override
+  String? get phoneNumber => null;
+  
+  @override
+  String? get photoURL => null;
+  
+  @override
+  List<UserInfo> get providerData => [];
+  
+  @override
+  String? get refreshToken => null;
+  
+  @override
+  String? get tenantId => null;
+  
+  @override
+  Future<void> delete() => throw UnimplementedError();
+  
+  @override
+  Future<String> getIdToken([bool forceRefresh = false]) => throw UnimplementedError();
+  
+  @override
+  Future<IdTokenResult> getIdTokenResult([bool forceRefresh = false]) => throw UnimplementedError();
+  
+  @override
+  Future<UserCredential> linkWithCredential(AuthCredential credential) => throw UnimplementedError();
+  
+  @override
+  Future<ConfirmationResult> linkWithPhoneNumber(String phoneNumber, [RecaptchaVerifier? verifier]) => throw UnimplementedError();
+  
+  @override
+  Future<UserCredential> linkWithPopup(AuthProvider provider) => throw UnimplementedError();
+  
+  @override
+  Future<void> linkWithRedirect(AuthProvider provider) => throw UnimplementedError();
+  
+  @override
+  MultiFactor get multiFactor => throw UnimplementedError();
+  
+  @override
+  Future<UserCredential> reauthenticateWithCredential(AuthCredential credential) => throw UnimplementedError();
+  
+  @override
+  Future<UserCredential> reauthenticateWithPopup(AuthProvider provider) => throw UnimplementedError();
+  
+  @override
+  Future<void> reauthenticateWithRedirect(AuthProvider provider) => throw UnimplementedError();
+  
+  @override
+  Future<void> reload() => throw UnimplementedError();
+  
+  @override
+  Future<void> sendEmailVerification([ActionCodeSettings? actionCodeSettings]) => throw UnimplementedError();
+  
+  @override
+  Future<User> unlink(String providerId) => throw UnimplementedError();
+  
+  @override
+  Future<void> updateDisplayName(String? displayName) => throw UnimplementedError();
+  
+  @override
+  Future<void> updateEmail(String newEmail) => throw UnimplementedError();
+  
+  @override
+  Future<void> updatePassword(String newPassword) => throw UnimplementedError();
+  
+  @override
+  Future<void> updatePhoneNumber(PhoneAuthCredential phoneCredential) => throw UnimplementedError();
+  
+  @override
+  Future<void> updatePhotoURL(String? photoURL) => throw UnimplementedError();
+  
+  @override
+  Future<void> updateProfile({String? displayName, String? photoURL}) => throw UnimplementedError();
+  
+  @override
+  Future<void> verifyBeforeUpdateEmail(String newEmail, [ActionCodeSettings? actionCodeSettings]) => throw UnimplementedError();
+  
+  @override
+  Future<UserCredential> linkWithProvider(AuthProvider provider) => throw UnimplementedError();
+  
+  @override
+  Future<UserCredential> reauthenticateWithProvider(AuthProvider provider) => throw UnimplementedError();
 }
 
 class AuthService {
@@ -21,6 +131,9 @@ class AuthService {
   
   // Mock user für Demo-Zwecke
   MockUser? _mockUser;
+  
+  // Stream Controller für Demo-Modus
+  final StreamController<User?> _authStateController = StreamController<User?>.broadcast();
   
   // Singleton-Pattern
   static final AuthService _instance = AuthService._internal();
@@ -35,7 +148,8 @@ class AuthService {
       _isFirebaseAvailable = true;
     } catch (e) {
       _isFirebaseAvailable = false;
-      _mockUser = MockUser(email: 'demo@foodzave.com', uid: 'demo-user-123');
+      // Für Demo-Modus: Stream initial mit null füllen (nicht angemeldet)
+      _authStateController.add(null);
       if (kDebugMode) {
         print('Firebase nicht verfügbar, verwende Mock-Authentifizierung');
       }
@@ -47,8 +161,8 @@ class AuthService {
     if (_isFirebaseAvailable && _auth != null) {
       return _auth!.authStateChanges();
     } else {
-      // Mock stream für Demo - simuliere einen eingeloggten Benutzer
-      return Stream.value(_createMockFirebaseUser());
+      // Für Demo-Modus verwenden wir den StreamController
+      return _authStateController.stream;
     }
   }
   
@@ -63,7 +177,12 @@ class AuthService {
   
   // Erstelle einen Mock Firebase User
   User? _createMockFirebaseUser() {
-    // Für Demo-Zwecke geben wir null zurück, damit die AuthScreen angezeigt wird
+    if (_mockUser != null) {
+      // Erstelle einen Mock User für Demo-Zwecke
+      // Da wir keinen echten Firebase User erstellen können, verwenden wir einen Trick
+      // und geben einen Mock zurück, der die wichtigsten Eigenschaften hat
+      return _MockFirebaseUser(_mockUser!);
+    }
     return null;
   }
   
@@ -110,6 +229,25 @@ class AuthService {
         print('Fehler bei der Anmeldung: $e');
       }
       rethrow;
+    }
+  }
+  
+  // Demo-Anmeldung
+  Future<void> signInAsDemo() async {
+    _mockUser = MockUser(
+      email: 'demo@foodzave.com',
+      uid: 'demo-user-123',
+      displayName: 'Demo Benutzer'
+    );
+    
+    // Simuliere eine kurze Verzögerung für bessere UX
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    // Stream aktualisieren
+    _authStateController.add(_createMockFirebaseUser());
+    
+    if (kDebugMode) {
+      print('Demo-Modus aktiviert');
     }
   }
   

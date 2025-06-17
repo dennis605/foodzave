@@ -135,17 +135,39 @@ class _AuthScreenState extends State<AuthScreen> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          height: MediaQuery.of(context).size.height,
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height,
+          ),
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 80),
+              const SizedBox(height: 20),
+              // Demo-Modus Button ganz oben
+              OutlinedButton(
+                onPressed: _isLoading ? null : _enterDemoMode,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 40),
+                  side: BorderSide(color: Theme.of(context).primaryColor),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.preview, size: 20, color: Theme.of(context).primaryColor),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Demo-Modus',
+                      style: TextStyle(color: Theme.of(context).primaryColor),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
               // App-Logo
               Icon(
                 Icons.eco_outlined,
-                size: 80,
+                size: 60,
                 color: Theme.of(context).primaryColor,
               ),
               const SizedBox(height: 16),
@@ -256,5 +278,26 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
       ),
     );
+  }
+  
+  Future<void> _enterDemoMode() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+    
+    try {
+      await _authService.signInAsDemo();
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Fehler beim Starten des Demo-Modus.';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "712792477015",
+    "project_id": "foodzave",
+    "storage_bucket": "foodzave.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:712792477015:android:de6e5dfad40bba2c268212",
+        "android_client_info": {
+          "package_name": "com.example.foodzave"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGqJU2TC9v9_B_7O8rWmGeDOQSjFkNBZQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
